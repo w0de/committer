@@ -16,15 +16,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Update go
+      - name: Install go
         run: |
-          brew install go@1.16
+          curl -L -o /tmp/go.pkg https://golang.org/dl/go1.16.darwin-amd64.pkg
+          sudo installer -pkg /tmp/go.pkg -target /
 
-      - name: Run Tests
+      - name: Run tests
         run: |
-          go mod init
-          go mod vendor
-          go test ./core
+          /usr/local/go/bin/go mod init
+          /usr/local/go/bin/go mod vendor
+          /usr/local/go/bin/go test ./core
 
       - name: Build universal binary
         run: |
