@@ -1,14 +1,17 @@
+---
 name: Merge new branches
 on:
   push:
     # Sequence of patterns matched against refs/tags
     tags:
-    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+      - 'v*'     # Push events to matching v*, i.e. v1.0, v20.15.10
 
 jobs:
   build:
     runs-on: macos-latest
     timeout-minutes: 10
+    strategy:
+      max-parallel: 1
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -18,13 +21,13 @@ jobs:
           curl -o /tmp/go.pkg https://golang.org/dl/go1.16.darwin-amd64.pkg
           installer -pkg /tmp/go.pkg -target /
 
-      - name: :hammer: Tests
+      - name: Run Tests
         run: |
           go mod init
           go mod vendor
           go test ./core
 
-      - name: :screwdriver: Build universal binary
+      - name: Build universal binary
         run: |
           /bin/bash .github/build.sh
 
