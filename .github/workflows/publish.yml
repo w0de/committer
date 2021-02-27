@@ -1,10 +1,9 @@
 ---
-name: Merge new branches
 on:
   push:
     # Sequence of patterns matched against refs/tags
     tags:
-      - 'v*'     # Push events to matching v*, i.e. v1.0, v20.15.10
+      - 'v*.*.*'     # Push events to matching v*, i.e. v1.0, v20.15.10
 
 jobs:
   build:
@@ -15,6 +14,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Set output
+        id: vars
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+
+      - name: Check output
+        env:
+          RELEASE_VERSION: ${{ steps.vars.outputs.tag }}
+        run: |
+          echo $RELEASE_VERSION
+          echo ${{ steps.vars.outputs.tag }}
 
       - name: Install go
         run: |
@@ -37,9 +47,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          body: ''
+          tag_name: ${{ steps.vars.outputs.tag }}
+          release_name: Release ${{ steps.vars.outputs.tag }}
+          body: 'Please enter details before publishing draft release'
           draft: true
           prerelease: true
 
@@ -51,5 +61,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
           asset_path: ./committer
-          asset_name: committer-${{ github.ref }}
+          asset_name: committer-${{ steps.vars.outputs.tag }}
           asset_content_type: application/octet-stream
