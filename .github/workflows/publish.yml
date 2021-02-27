@@ -18,7 +18,7 @@ jobs:
 
       - name: Update go
         run: |
-          brew upgrade go
+          brew install go@1.16
 
       - name: Run Tests
         run: |
